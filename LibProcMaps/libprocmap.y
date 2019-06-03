@@ -4,14 +4,23 @@
 #include <inttypes.h>
 #include <string.h>
 
+// TODO: fix circular dependency between headers
+typedef void* yyscan_t;
+
 #include "libprocmap.h"
+#include "libprocmap.tab.h"
 #include "libprocmap.yy.h"
 
-void yyerror(char *s);
+extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, const char *str);
 
 static void (*callback)(struct memmap*);
 
 %}
+
+%define api.pure full
+%locations
+%lex-param {yyscan_t scanner}
+%parse-param {yyscan_t scanner}
 
 %union
 {
@@ -74,22 +83,30 @@ path : pathname
 int get_proc_map(int pid, void (*cb)(struct memmap*))
 {
 	char fname[32];
+	FILE *in;
+	yyscan_t scanner;
+	int result;
 
 	sprintf(fname, "/proc/%d/maps", pid);
 	printf("Will open: %s\n", fname);
 
-	yyin = fopen(fname, "r");
-	if (yyin == NULL)
+	in = fopen(fname, "r");
+	if (in == NULL)
 		return 1;
+
+	yylex_init(&scanner);
+	yyset_in(in, scanner);
 
 	printf("Starting...\n");
 	callback = cb;
-	return yyparse();
+	result = yyparse(scanner);
+
+	yylex_destroy(scanner);
+
+	return result;
 }
 
-void yyerror(char *str)
+extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, const char *str)
 {
-	fprintf(stderr, "%s at line %d (%s)\n", str, yylineno, yytext);
+	fprintf(stderr, "%s\n", str);
 }
-
-
