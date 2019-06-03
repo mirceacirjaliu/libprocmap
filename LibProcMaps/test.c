@@ -5,7 +5,7 @@
 
 void callback(struct memmap *map)
 {
-	printf("%lx - %lx in %s\n", map->start, map->end, map->pathname);
+	printf("%016lx - %016lx in %s\n", map->start, map->end, map->pathname);
 }
 
 int main(int argc, char* argv[])

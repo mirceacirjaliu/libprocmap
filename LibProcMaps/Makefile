@@ -1,6 +1,7 @@
 
 
 YACC = bison
+CFLAGS = -O0 -g3
 
 OBJECTS = libprocmap.tab.o libprocmap.yy.o
 
@@ -20,7 +21,7 @@ libprocmap.yy.o : libprocmap.yy.c libprocmap.tab.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 test : test.c libprocmap.a
-	$(CC) -O0 -g3 -o test test.c libprocmap.a
+	$(CC) $(CFLAGS) $(CPPFLAGS) -o test test.c libprocmap.a
 
 .PHONY: clean
 

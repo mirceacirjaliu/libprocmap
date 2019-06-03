@@ -1,6 +1,7 @@
 %{
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "libprocmap.h"
 #include "libprocmap.tab.h"
@@ -14,18 +15,13 @@ extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, const char *str);
 
 %%
 
-[0-9]+				{	/* decimal */
-						//printf("Found decimal: %s\n", yytext);
+[0-9a-f]+			{	/* number */
+						//printf("Found number: %s\n", yytext);
 
-						yylval->number = strtol(yytext, NULL, 10);
-						return number;
-					}
+						strncpy(yylval->string, yytext, yyleng);
+						yylval->string[yyleng] = '\0';
 
-[0-9a-f]+			{	/* hexadecimal */
-						//printf("Found hex: %s\n", yytext);
-
-						yylval->number = strtol(yytext, NULL, 16);
-						return number;
+						return num;
 					}
 
 [r|-][w|-][x|-][s|p] {	/* permissions */
@@ -39,13 +35,46 @@ extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, const char *str);
 						return perms;
 					}
 
-\/[a-zA-Z0-9\/\-_\.]+	{ yylval->string = yytext; return pathname; }
+\/[a-zA-Z0-9\/\-_\.]+	{
+							strncpy(yylval->string, yytext, yyleng);
+							yylval->string[yyleng] = '\0';
 
-"[heap]"			{ yylval->string = yytext; return heap; }
-"[stack]"			{ yylval->string = yytext; return stack; }
-"[vvar]"			{ yylval->string = yytext; return vvar; }
-"[vdso]"			{ yylval->string = yytext; return vdso; }
-"[vsyscall]"		{ yylval->string = yytext; return vsyscall; }
+							return pathname;
+						}
+
+"[heap]"				{
+							strncpy(yylval->string, yytext, yyleng);
+							yylval->string[yyleng] = '\0';
+
+							return heap;
+						}
+
+"[stack]"				{
+							strncpy(yylval->string, yytext, yyleng);
+							yylval->string[yyleng] = '\0';
+							return stack;
+						}
+
+"[vvar]"				{
+							strncpy(yylval->string, yytext, yyleng);
+							yylval->string[yyleng] = '\0';
+
+							return vvar;
+						}
+
+"[vdso]"				{
+							strncpy(yylval->string, yytext, yyleng);
+							yylval->string[yyleng] = '\0';
+
+							return vdso;
+						}
+
+"[vsyscall]"			{
+							strncpy(yylval->string, yytext, yyleng);
+							yylval->string[yyleng] = '\0';
+
+							return vsyscall;
+						}
 
 [ \t]				;
 

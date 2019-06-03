@@ -30,7 +30,6 @@ struct memmap {
 	char pathname[256];
 };
 
-
 int get_proc_map(int pid, void (*cb)(struct memmap*));
 
 #endif /* __LIBPROCMAP_H__ */

@@ -24,16 +24,15 @@ static void (*callback)(struct memmap*);
 
 %union
 {
-		uint64_t number;
+		char string[256];
 		struct perms perms;
-		char *string;
 		struct memmap map;
 }
 
 %start lines
 
 %token <perms> perms
-%token <number> number
+%token <string> num
 
 %token <string> pathname
 %token <string> heap
@@ -51,31 +50,28 @@ lines : line
 	  | lines line
 	  ;
 
-line : number'-'number perms number number':'number number path '\n'
+line : num'-'num perms num num':'num num path '\n'
 	{
-		$$.start = $1;
-		$$.end = $3;
+		$$.start = strtol($1, NULL, 16);
+		$$.end = strtol($3, NULL, 16);
 		$$.perms = $4;
-		$$.offset = $5;
-		$$.dev.major = $6;
-		$$.dev.minor = $8;
-		$$.inode = $9;
-		if ($10 != NULL)
-			strcpy($$.pathname, $10);
-		else
-			$$.pathname[0] = '\0';
+		$$.offset = strtol($5, NULL, 16);
+		$$.dev.major = strtol($6, NULL, 16);
+		$$.dev.minor = strtol($8, NULL, 16);
+		$$.inode = strtol($9, NULL, 10);
+		strcpy($$.pathname, $10);
 
 		callback(&$$);
 	}
 	;
 
 path : pathname
-	| heap		{ $$ = $1; }
-	| stack		{ $$ = $1; }
-	| vvar		{ $$ = $1; }
-	| vdso		{ $$ = $1; }
-	| vsyscall	{ $$ = $1; }
-	| %empty	{ $$ = NULL; }
+	| heap		{ strcpy($$, $1); }
+	| stack		{ strcpy($$, $1); }
+	| vvar		{ strcpy($$, $1); }
+	| vdso		{ strcpy($$, $1); }
+	| vsyscall	{ strcpy($$, $1); }
+	| %empty	{ $$[0] = '\0'; }
 	;
 
 %%
@@ -97,7 +93,7 @@ int get_proc_map(int pid, void (*cb)(struct memmap*))
 	yylex_init(&scanner);
 	yyset_in(in, scanner);
 
-	printf("Starting...\n");
+	// TODO: pass callback to parser, breaks reentrancy
 	callback = cb;
 	result = yyparse(scanner);
 
