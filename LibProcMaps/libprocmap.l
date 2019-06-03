@@ -11,17 +11,17 @@ extern void yyerror(char *str);
 
 %%
 
-[0-9a-f]+			{	/* hexadecimal */
-						//printf("Found hex: %s\n", yytext);
-
-						yylval.number = strtol(yytext, NULL, 16);
-						return number;
-					}
-
 [0-9]+				{	/* decimal */
 						//printf("Found decimal: %s\n", yytext);
 
 						yylval.number = strtol(yytext, NULL, 10);
+						return number;
+					}
+
+[0-9a-f]+			{	/* hexadecimal */
+						//printf("Found hex: %s\n", yytext);
+
+						yylval.number = strtol(yytext, NULL, 16);
 						return number;
 					}
 
@@ -44,7 +44,7 @@ extern void yyerror(char *str);
 "[vdso]"			{ yylval.string = yytext; return vdso; }
 "[vsyscall]"		{ yylval.string = yytext; return vsyscall; }
 
-[ \t]				; 
+[ \t]				;
 
 [-:]				{ return yytext[0]; }
 [\n]				{
@@ -52,7 +52,7 @@ extern void yyerror(char *str);
 						return yytext[0];
 					}
 
-.					{ ECHO; printf("unexpected character: %c\n", yytext[0]); } 
+.					{ ECHO; printf("unexpected character: %c\n", yytext[0]); }
 
 
 %%

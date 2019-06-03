@@ -5,18 +5,15 @@
 #include <string.h>
 
 #include "libprocmap.h"
+#include "libprocmap.yy.h"
 
-extern FILE *yyin;
-extern int yylex(void);
-extern int yylineno;
-extern char *yytext;
 void yyerror(char *s);
 
 static void (*callback)(struct memmap*);
 
 %}
 
-%union 
+%union
 {
 		uint64_t number;
 		struct perms perms;
@@ -45,7 +42,7 @@ lines : line
 	  | lines line
 	  ;
 
-line : number'-'number perms number number':'number number path '\n' 
+line : number'-'number perms number number':'number number path '\n'
 	{
 		$$.start = $1;
 		$$.end = $3;
@@ -63,7 +60,7 @@ line : number'-'number perms number number':'number number path '\n'
 	}
 	;
 
-path : pathname 
+path : pathname
 	| heap		{ $$ = $1; }
 	| stack		{ $$ = $1; }
 	| vvar		{ $$ = $1; }
@@ -77,7 +74,7 @@ path : pathname
 int get_proc_map(int pid, void (*cb)(struct memmap*))
 {
 	char fname[32];
-	
+
 	sprintf(fname, "/proc/%d/maps", pid);
 	printf("Will open: %s\n", fname);
 
