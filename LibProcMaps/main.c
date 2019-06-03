@@ -6,7 +6,7 @@
 
 // 7effb8a6d000 - 7effb926d000 rw - p 00000000 00:00 0
 // 7effb926d000 - 7effb9278000 r - xp 00000000 08 : 01 27001099 / lib / x86_64 - linux - gnu / libnss_files - 2.23.so
-struct mem_map
+struct vma_map
 {
 	uint64_t start;
 	uint64_t end;
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 	}
 
 	/*do {
-		struct mem_map map;
+		struct vma_map map;
 		memset(&map, 0, sizeof(map));
 
 		result = fscanf(maps, SCNx64"-"SCNx64" %s "SCNx32" %d:%d %d %s\n",
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	} while (result == 6 || result == 7);*/
 
 	do {
-		struct mem_map map;
+		struct vma_map map;
 		memset(&map, 0, sizeof(map));
 
 		char line[256];

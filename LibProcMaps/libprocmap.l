@@ -6,7 +6,7 @@
 #include "libprocmap.h"
 #include "libprocmap.tab.h"
 
-extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, const char *str);
+extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char *str);
 
 %}
 

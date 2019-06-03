@@ -11,22 +11,20 @@ typedef void* yyscan_t;
 #include "libprocmap.tab.h"
 #include "libprocmap.yy.h"
 
-extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, const char *str);
-
-static void (*callback)(struct memmap*);
+void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char *str);
 
 %}
 
 %define api.pure full
 %locations
-%lex-param {yyscan_t scanner}
-%parse-param {yyscan_t scanner}
+%param {yyscan_t scanner}
+%parse-param {vma_map_cb cb}
 
 %union
 {
 		char string[256];
 		struct perms perms;
-		struct memmap map;
+		struct vma_map map;
 }
 
 %start lines
@@ -61,7 +59,7 @@ line : num'-'num perms num num':'num num path '\n'
 		$$.inode = strtol($9, NULL, 10);
 		strcpy($$.pathname, $10);
 
-		callback(&$$);
+		cb(&$$);
 	}
 	;
 
@@ -76,7 +74,7 @@ path : pathname
 
 %%
 
-int get_proc_map(int pid, void (*cb)(struct memmap*))
+int get_proc_map(int pid, vma_map_cb cb)
 {
 	char fname[32];
 	FILE *in;
@@ -84,8 +82,6 @@ int get_proc_map(int pid, void (*cb)(struct memmap*))
 	int result;
 
 	sprintf(fname, "/proc/%d/maps", pid);
-	printf("Will open: %s\n", fname);
-
 	in = fopen(fname, "r");
 	if (in == NULL)
 		return 1;
@@ -93,16 +89,14 @@ int get_proc_map(int pid, void (*cb)(struct memmap*))
 	yylex_init(&scanner);
 	yyset_in(in, scanner);
 
-	// TODO: pass callback to parser, breaks reentrancy
-	callback = cb;
-	result = yyparse(scanner);
+	result = yyparse(scanner, cb);
 
 	yylex_destroy(scanner);
 
 	return result;
 }
 
-extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, const char *str)
+void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char *str)
 {
 	fprintf(stderr, "%s\n", str);
 }

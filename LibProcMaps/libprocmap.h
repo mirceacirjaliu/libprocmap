@@ -18,7 +18,7 @@ struct perms
 	uint8_t shared : 1;
 };
 
-struct memmap {
+struct vma_map {
 	uint64_t start;
 	uint64_t end;
 
@@ -30,6 +30,8 @@ struct memmap {
 	char pathname[256];
 };
 
-int get_proc_map(int pid, void (*cb)(struct memmap*));
+typedef void (*vma_map_cb)(struct vma_map *);
+
+int get_proc_map(int pid, vma_map_cb cb);
 
 #endif /* __LIBPROCMAP_H__ */

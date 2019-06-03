@@ -3,7 +3,7 @@
 
 #include "libprocmap.h"
 
-void callback(struct memmap *map)
+void callback(struct vma_map *map)
 {
 	printf("%016lx - %016lx in %s\n", map->start, map->end, map->pathname);
 }
