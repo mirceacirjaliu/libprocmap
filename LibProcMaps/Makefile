@@ -23,6 +23,8 @@ libprocmap.yy.o : libprocmap.yy.c libprocmap.tab.h
 install : libprocmap.a
 	mkdir -p /usr/local/lib
 	install -m 0644 libprocmap.a /usr/local/lib/libprocmap.a
+	mkdir -p /usr/local/include
+	install -m 0644 libprocmap.h /usr/local/include/libprocmap.h
 
 test : test.c libprocmap.a
 	$(CC) $(CFLAGS) $(CPPFLAGS) -o test test.c libprocmap.a

@@ -93,6 +93,7 @@ int direct_parse(const char *fname, vma_map_cb cb)
 	result = yyparse(scanner, cb);
 
 	yylex_destroy(scanner);
+	fclose(in);
 
 	return result;
 }
