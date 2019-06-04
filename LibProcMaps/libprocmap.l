@@ -16,17 +16,16 @@ extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char
 %%
 
 [0-9a-f]+			{	/* number */
-						//printf("Found number: %s\n", yytext);
-
 						strncpy(yylval->string, yytext, yyleng);
 						yylval->string[yyleng] = '\0';
+
+						// TODO: each rule must increment location !
+						// yylloc...
 
 						return num;
 					}
 
 [r|-][w|-][x|-][s|p] {	/* permissions */
-						//printf("Found permissions: %s\n", yytext);
-
 						yylval->perms.read = yytext[0] == 'r';
 						yylval->perms.write = yytext[1] == 'w';
 						yylval->perms.execute = yytext[2] == 'x';
@@ -85,13 +84,9 @@ extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char
 
 [ \t]				;
 
-[-:]				{ return yytext[0]; }
-[\n]				{
-						yylineno++;
-						return yytext[0];
-					}
+[-:\n]				{ return yytext[0]; }
 
-.					{ ECHO; printf("unexpected character: %c\n", yytext[0]); }
+.					{ return yytext[0]; }
 
 
 %%

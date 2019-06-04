@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
+#include <errno.h>
 
 // TODO: fix circular dependency between headers
 typedef void* yyscan_t;
@@ -47,6 +48,7 @@ void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char *str);
 
 lines : line
 	  | lines line
+	  | %empty
 	  ;
 
 line : num'-'num perms num num':'num num path '\n'
@@ -100,5 +102,6 @@ int get_proc_map(int pid, vma_map_cb cb)
 
 void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char *str)
 {
-	fprintf(stderr, "%s\n", str);
+	fprintf(stderr, "%s @ %d, %d\n", str, yylloc->first_line, yylloc->first_column);
+	errno = EINVAL;
 }

@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <string.h>
 
 #include "libprocmap.h"
 
@@ -24,6 +26,8 @@ int main(int argc, char* argv[])
 	result = get_proc_map(pid, callback);
 	if (result == 0)
 		printf("Success!\n");
+	else
+		fprintf(stderr, "Error: %s\n", strerror(errno));
 
 	return result;
 }
