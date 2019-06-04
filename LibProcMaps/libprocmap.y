@@ -46,8 +46,7 @@ void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char *str);
 
 %%
 
-lines : line
-	  | lines line
+lines : lines line
 	  | %empty
 	  ;
 
