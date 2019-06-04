@@ -85,7 +85,6 @@
     <ClInclude Include="libprocmap.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.c" />
     <ClCompile Include="test.c" />
   </ItemGroup>
   <ItemDefinitionGroup />

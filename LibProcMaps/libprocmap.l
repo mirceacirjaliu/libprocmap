@@ -35,7 +35,7 @@ extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char
 						return perms;
 					}
 
-\/[a-zA-Z0-9\/\-_\.]+	{
+\/[a-zA-Z0-9\/\-\+_\.]+	{
 							strncpy(yylval->string, yytext, yyleng);
 							yylval->string[yyleng] = '\0';
 
@@ -74,6 +74,13 @@ extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char
 							yylval->string[yyleng] = '\0';
 
 							return vsyscall;
+						}
+
+"(deleted)"				{
+							strncpy(yylval->string, yytext, yyleng);
+							yylval->string[yyleng] = '\0';
+
+							return deleted;
 						}
 
 [ \t]				;

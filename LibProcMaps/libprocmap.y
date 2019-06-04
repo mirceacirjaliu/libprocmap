@@ -38,6 +38,7 @@ void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char *str);
 %token <string> vvar
 %token <string> vdso
 %token <string> vsyscall
+%token <string> deleted
 
 %type <map> line
 %type <string> path
@@ -63,7 +64,8 @@ line : num'-'num perms num num':'num num path '\n'
 	}
 	;
 
-path : pathname
+path : pathname			{ strcpy($$, $1); }
+	| pathname deleted	{ strcpy($$, $1); strcat($$, " "); strcat($$, $2); }
 	| heap		{ strcpy($$, $1); }
 	| stack		{ strcpy($$, $1); }
 	| vvar		{ strcpy($$, $1); }
