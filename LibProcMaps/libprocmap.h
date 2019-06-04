@@ -30,9 +30,9 @@ struct vma_map {
 	char pathname[256];
 };
 
-typedef void (*vma_map_cb)(struct vma_map *);
+typedef void (*vma_map_cb)(void *env, struct vma_map *);
 
-int direct_parse(const char *fname, vma_map_cb cb);
-int get_proc_map(int pid, vma_map_cb cb);
+int direct_parse(const char *fname, vma_map_cb cb, void *env);
+int get_proc_map(int pid, vma_map_cb cb, void *env);
 
 #endif /* __LIBPROCMAP_H__ */

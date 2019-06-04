@@ -12,7 +12,7 @@ typedef void* yyscan_t;
 #include "libprocmap.tab.h"
 #include "libprocmap.yy.h"
 
-void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char *str);
+void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, void *env, const char *str);
 
 %}
 
@@ -20,6 +20,7 @@ void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char *str);
 %locations
 %param {yyscan_t scanner}
 %parse-param {vma_map_cb cb}
+%parse-param {void *env}
 
 %union
 {
@@ -61,7 +62,7 @@ line : num'-'num perms num num':'num num path '\n'
 		$$.inode = strtol($9, NULL, 10);
 		strcpy($$.pathname, $10);
 
-		cb(&$$);
+		cb(env, &$$);
 	}
 	;
 
@@ -77,7 +78,7 @@ path : pathname			{ strcpy($$, $1); }
 
 %%
 
-int direct_parse(const char *fname, vma_map_cb cb)
+int direct_parse(const char *fname, vma_map_cb cb, void *env)
 {
 	FILE *in;
 	yyscan_t scanner;
@@ -90,7 +91,7 @@ int direct_parse(const char *fname, vma_map_cb cb)
 	yylex_init(&scanner);
 	yyset_in(in, scanner);
 
-	result = yyparse(scanner, cb);
+	result = yyparse(scanner, cb, env);
 
 	yylex_destroy(scanner);
 	fclose(in);
@@ -98,16 +99,16 @@ int direct_parse(const char *fname, vma_map_cb cb)
 	return result;
 }
 
-int get_proc_map(int pid, vma_map_cb cb)
+int get_proc_map(int pid, vma_map_cb cb, void *env)
 {
 	char fname[32];
 
 	sprintf(fname, "/proc/%d/maps", pid);
 
-	return direct_parse(fname, cb);
+	return direct_parse(fname, cb, env);
 }
 
-void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char *str)
+void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, void *env, const char *str)
 {
 	fprintf(stderr, "%s @ %d, %d\n", str, yylloc->first_line, yylloc->first_column);
 	errno = EINVAL;
