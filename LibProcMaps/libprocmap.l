@@ -8,6 +8,19 @@
 
 extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char *str);
 
+#define add_token_column(yylloc)					\
+do {												\
+	yylloc->first_column = yylloc->last_column;		\
+	yylloc->last_column += yyleng;					\
+} while(0)
+
+#define inc_token_line(yylloc)						\
+do {												\
+	yylloc->first_column = yylloc->last_column = 1;	\
+	yylloc->first_line++;							\
+	yylloc->last_line++;							\
+} while(0)
+
 %}
 
 %option bison-bridge bison-locations
@@ -15,28 +28,31 @@ extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char
 
 %%
 
-[0-9a-f]+			{	/* number */
-						strncpy(yylval->string, yytext, yyleng);
-						yylval->string[yyleng] = '\0';
+[0-9a-f]+				{	/* number */
+							strncpy(yylval->string, yytext, yyleng);
+							yylval->string[yyleng] = '\0';
 
-						// TODO: each rule must increment location !
-						// yylloc...
+							add_token_column(yylloc);
 
-						return num;
-					}
+							return num;
+						}
 
-[r|-][w|-][x|-][s|p] {	/* permissions */
-						yylval->perms.read = yytext[0] == 'r';
-						yylval->perms.write = yytext[1] == 'w';
-						yylval->perms.execute = yytext[2] == 'x';
-						yylval->perms.shared = yytext[3] == 's';
+[r|-][w|-][x|-][s|p]	{	/* permissions */
+							yylval->perms.read = yytext[0] == 'r';
+							yylval->perms.write = yytext[1] == 'w';
+							yylval->perms.execute = yytext[2] == 'x';
+							yylval->perms.shared = yytext[3] == 's';
 
-						return perms;
-					}
+							add_token_column(yylloc);
+
+							return perms;
+						}
 
 \/[a-zA-Z0-9\/\-\+_\.]+	{
 							strncpy(yylval->string, yytext, yyleng);
 							yylval->string[yyleng] = '\0';
+
+							add_token_column(yylloc);
 
 							return pathname;
 						}
@@ -45,18 +61,25 @@ extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char
 							strncpy(yylval->string, yytext, yyleng);
 							yylval->string[yyleng] = '\0';
 
+							add_token_column(yylloc);
+
 							return heap;
 						}
 
 "[stack]"				{
 							strncpy(yylval->string, yytext, yyleng);
 							yylval->string[yyleng] = '\0';
+
+							add_token_column(yylloc);
+
 							return stack;
 						}
 
 "[vvar]"				{
 							strncpy(yylval->string, yytext, yyleng);
 							yylval->string[yyleng] = '\0';
+
+							add_token_column(yylloc);
 
 							return vvar;
 						}
@@ -65,12 +88,16 @@ extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char
 							strncpy(yylval->string, yytext, yyleng);
 							yylval->string[yyleng] = '\0';
 
+							add_token_column(yylloc);
+
 							return vdso;
 						}
 
 "[vsyscall]"			{
 							strncpy(yylval->string, yytext, yyleng);
 							yylval->string[yyleng] = '\0';
+
+							add_token_column(yylloc);
 
 							return vsyscall;
 						}
@@ -79,15 +106,32 @@ extern void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char
 							strncpy(yylval->string, yytext, yyleng);
 							yylval->string[yyleng] = '\0';
 
+							add_token_column(yylloc);
+
 							return deleted;
 						}
 
-[ \t]				;
+[ \t]+					{
+							add_token_column(yylloc);
+						}
 
-[-:\n]				{ return yytext[0]; }
+[-:]					{
+							add_token_column(yylloc);
 
-.					{ return yytext[0]; }
+							return yytext[0];
+						}
 
+[\n]					{
+							inc_token_line(yylloc);
+
+							return yytext[0];
+						}
+
+.						{
+							add_token_column(yylloc);
+
+							return yytext[0];
+						}
 
 %%
 

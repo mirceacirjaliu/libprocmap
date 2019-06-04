@@ -15,15 +15,21 @@ int main(int argc, char* argv[])
 	int pid;
 	int result;
 
-	if (argc != 2) {
-		printf("Usage: %s <pid>\n", argv[1]);
+	if (argc == 2) {
+		pid = atoi(argv[1]);
+		printf("Doing process: %d\n", pid);
+		result = get_proc_map(pid, callback);
+	}
+	else if (argc == 3 && !strcmp(argv[1], "-d"))
+	{
+		printf("Doing file: %s\n", argv[2]);
+		result = direct_parse(argv[2], callback);
+	}
+	else {
+		printf("Usage: %s <-d file> | <pid>\n", argv[1]);
 		return 1;
 	}
 
-	pid = atoi(argv[1]);
-	printf("Doing process: %d\n", pid);
-
-	result = get_proc_map(pid, callback);
 	if (result == 0)
 		printf("Success!\n");
 	else

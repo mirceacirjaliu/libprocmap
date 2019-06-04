@@ -78,14 +78,12 @@ path : pathname			{ strcpy($$, $1); }
 
 %%
 
-int get_proc_map(int pid, vma_map_cb cb)
+int direct_parse(const char *fname, vma_map_cb cb)
 {
-	char fname[32];
 	FILE *in;
 	yyscan_t scanner;
 	int result;
 
-	sprintf(fname, "/proc/%d/maps", pid);
 	in = fopen(fname, "r");
 	if (in == NULL)
 		return 1;
@@ -98,6 +96,15 @@ int get_proc_map(int pid, vma_map_cb cb)
 	yylex_destroy(scanner);
 
 	return result;
+}
+
+int get_proc_map(int pid, vma_map_cb cb)
+{
+	char fname[32];
+
+	sprintf(fname, "/proc/%d/maps", pid);
+
+	return direct_parse(fname, cb);
 }
 
 void yyerror(YYLTYPE *yylloc, yyscan_t scanner, vma_map_cb cb, const char *str)
